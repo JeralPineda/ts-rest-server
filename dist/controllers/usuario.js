@@ -18,7 +18,7 @@ const getUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     // Leer de la BD
     const usuarios = yield usuario_1.default.findAll();
     res.json({
-        usuarios
+        usuarios,
     });
 });
 exports.getUsuarios = getUsuarios;
@@ -27,37 +27,69 @@ const getUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const usuario = yield usuario_1.default.findByPk(id);
     if (!usuario) {
         res.status(404).json({
-            msg: `No existe un usuario con el id ${id}`
+            msg: `No existe un usuario con el id ${id}`,
         });
     }
     res.json({
-        usuario
+        usuario,
     });
 });
 exports.getUsuario = getUsuario;
-const postUsuario = (req, res) => {
+const postUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { body } = req;
-    res.json({
-        msg: 'postUsuario',
-        body
-    });
-};
+    try {
+        const existeEmail = yield usuario_1.default.findOne({
+            where: {
+                email: body.email,
+            },
+        });
+        if (existeEmail) {
+            res.status(400).json({
+                msg: `Ya existe un usuario con el email ${body.email}`,
+            });
+        }
+        const usuario = usuario_1.default.build(body);
+        yield usuario.save();
+        res.json({
+            usuario,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: 'Hable con el administrador',
+        });
+    }
+});
 exports.postUsuario = postUsuario;
-const putUsuario = (req, res) => {
+const putUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { body } = req;
-    res.json({
-        msg: 'putUsuario',
-        id,
-        body
-    });
-};
+    try {
+        const usuario = yield usuario_1.default.findByPk(id);
+        if (!usuario) {
+            res.status(404).json({
+                msg: `No existe un usuario con el id ${id}`,
+            });
+        }
+        yield (usuario === null || usuario === void 0 ? void 0 : usuario.update(body));
+        res.json({
+            usuario,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: 'Hable con el administrador',
+        });
+    }
+});
 exports.putUsuario = putUsuario;
 const deleteUsuario = (req, res) => {
     const { id } = req.params;
     res.json({
         msg: 'deleteUsuario',
-        id
+        id,
     });
 };
 exports.deleteUsuario = deleteUsuario;
